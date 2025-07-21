@@ -1,0 +1,5 @@
+{
+  "name": "CSV Data Visualizer",
+  "description": "An Electron application that allows a user to select or drop a .csv file and visualizes the data in a paginated table. Built with Electron, React, TypeScript, and Tailwind CSS.",
+  "requestFramePermissions": []
+}

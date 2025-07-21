@@ -1,0 +1,61 @@
+{
+  "name": "csv-data-visualizer",
+  "description": "A desktop application to visualize and search CSV data.",
+  "author": "Sean Rafferty",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "homepage": "./",
+  "main": "main.js",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "start": "concurrently \"npm run dev\" \"npm run electron\"",
+    "electron": "electron . --trace-warnings",
+    "dist": "npm run build && electron-builder",
+    "dist:win": "npm run build && electron-builder --win",
+    "dist:mac": "npm run build && electron-builder --mac",
+    "release": "npm run dist"
+  },
+  "dependencies": {
+    "fuse.js": "^7.1.0",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.1.11",
+    "@types/node": "^22.14.0",
+    "@types/react": "^19.1.8",
+    "@types/react-dom": "^19.1.6",
+    "autoprefixer": "^10.4.21",
+    "concurrently": "^9.2.0",
+    "electron": "^37.2.3",
+    "electron-builder": "^26.0.12",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^4.1.11",
+    "typescript": "~5.7.2",
+    "vite": "^6.2.0"
+  },
+  "build": {
+    "appId": "com.example.csv-data-visualizer",
+    "productName": "CSV Data Visualizer",
+    "files": [
+      "dist/**/*",
+      "main.js",
+      "preload.js",
+      "package.json"
+    ],
+    "directories": {
+      "output": "dist_electron"
+    },
+    "mac": {
+      "target": "dmg",
+      "arch": "arm64"
+    },
+    "win": {
+      "target": "nsis",
+      "arch": "x64"
+    }
+  }
+}
