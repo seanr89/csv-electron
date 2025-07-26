@@ -19,14 +19,14 @@ jobs:
 
     - name: Install dependencies
       run: npm install
-      working-directory: ./ai-content-summarizer
+      #working-directory: ./ai-content-summarizer
 
     - name: Build macOS app
       run: npm run dist:mac
-      working-directory: ./ai-content-summarizer
+      #working-directory: ./ai-content-summarizer
 
     - name: Upload artifact
       uses: actions/upload-artifact@v4
       with:
         name: ai-summarizer
-        path: ./ai-content-summarizer/dist_electron/summarizer-*.dmg
+        path: ./dist_electron/reader-*.dmg

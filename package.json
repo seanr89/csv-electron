@@ -38,7 +38,7 @@
     "vite": "^6.2.0"
   },
   "build": {
-    "appId": "com.example.csv-data-visualizer",
+    "appId": "com.example.reader",
     "productName": "CSV Data Visualizer",
     "files": [
       "dist/**/*",
