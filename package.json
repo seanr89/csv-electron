@@ -39,7 +39,7 @@
   },
   "build": {
     "appId": "com.example.reader",
-    "productName": "CSV Data Visualizer",
+    "productName": "CSV-Visualizer",
     "files": [
       "dist/**/*",
       "main.js",

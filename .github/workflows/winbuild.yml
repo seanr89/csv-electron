@@ -8,6 +8,8 @@ on:
 jobs:
   build:
     runs-on: windows-latest
+    permissions: # Add this block
+      contents: write
 
     steps:
     - uses: actions/checkout@v3
@@ -19,11 +21,11 @@ jobs:
 
     - name: Install dependencies
       run: npm install
-      #working-directory: ./ai-content-summarizer
 
     - name: Build Windows installer
       run: npm run dist:win
-      #working-directory: ./ai-content-summarizer
+      env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Upload artifact
       uses: actions/upload-artifact@v4
