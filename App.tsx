@@ -17,7 +17,7 @@ const App: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [fileName, setFileName] = useState<string>('');
-  const [delimiter, setDelimiter] = useState<string>(',');
+  const [delimiter, setDelimiter] = useState<string>('|');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [searchColumn, setSearchColumn] = useState<string>('');
 
