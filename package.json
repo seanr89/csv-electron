@@ -6,12 +6,13 @@
   "version": "0.1.0",
   "type": "module",
   "homepage": "./",
-  "main": "main.js",
+  "main": "dist-electron/main.js",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build",
+    "build-main": "tsc -p tsconfig.main.json",
+    "build": "npm run build-main && tsc && vite build",
     "preview": "vite preview",
-    "start": "concurrently \"npm run dev\" \"npm run electron\"",
+    "start": "npm run build-main && concurrently \"npm run dev\" \"npm run electron\"",
     "electron": "electron . --trace-warnings",
     "dist": "npm run build && electron-builder",
     "dist:win": "npm run build && electron-builder --win --x64",
@@ -42,8 +43,7 @@
     "productName": "CSV-Visualizer",
     "files": [
       "dist/**/*",
-      "main.js",
-      "preload.js",
+      "dist-electron/**/*",
       "package.json"
     ],
     "directories": {

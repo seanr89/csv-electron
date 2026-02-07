@@ -6,10 +6,10 @@ This is a desktop application built with Electron, React, and Tailwind CSS that 
 
 The application is composed of two main processes:
 
-1.  **Main Process (`main.js`):** This is the entry point of the Electron application. It creates the main browser window and handles all the interactions with the operating system.
+1.  **Main Process (`main.ts`):** This is the entry point of the Electron application. It creates the main browser window and handles all the interactions with the operating system.
 2.  **Renderer Process (`App.tsx`):** This is the user interface of the application, built with React. It runs in the browser window created by the main process and is responsible for rendering the UI and handling user interactions.
 
-The two processes communicate with each other through the `preload.js` script, which securely exposes Node.js APIs to the renderer process.
+The two processes communicate with each other through the `preload.ts` script, which securely exposes Node.js APIs to the renderer process.
 
 ## Run and deploy your AI Studio app
 
