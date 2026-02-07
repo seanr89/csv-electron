@@ -111,18 +111,18 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-4 sm:p-6 lg:p-8 bg-slate-900">
+    <div className="min-h-screen flex flex-col items-center justify-start p-4 sm:p-6 lg:p-8 bg-slate-900 pt-10">
       <div className="w-full max-w-7xl mx-auto">
         <header className="text-center mb-8">
-          <h1 className="text-4xl sm:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-600">
+          <h2 className="text-4xl sm:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-600">
             CSV Data Visualizer
-          </h1>
+          </h2>
         </header>
 
         <main className="bg-slate-800/50 rounded-2xl shadow-2xl shadow-cyan-500/10 backdrop-blur-sm border border-slate-700">
           {!data && !isLoading && !fileName ? (
             <div className="p-8">
-              <SummaryView recordCount={0} columnCount={0} />
+              <SummaryView recordCount={0} columnCount={0} className="mb-8" />
               <div className="mb-4 flex justify-center">
                 <select
                   value={delimiter}
@@ -147,9 +147,9 @@ const App: React.FC = () => {
               <div className="flex flex-col sm:flex-row justify-between items-center mb-4 gap-4">
                 <div className="flex items-center gap-3">
                   <TableIcon className="w-8 h-8 text-cyan-400" />
-                  <div>
+                  <div className="flex items-center gap-6">
                     <h2 className="text-2xl font-bold text-white">{fileName}</h2>
-                    <SummaryView recordCount={totalRecords} columnCount={headers.length} />
+                    <SummaryView recordCount={totalRecords} columnCount={headers.length} className="scale-75 origin-left" />
                   </div>
                 </div>
                 <button
