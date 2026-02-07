@@ -20,13 +20,14 @@
     "release": "npm run dist"
   },
   "dependencies": {
+    "csv-parser": "^3.2.0",
     "fuse.js": "^7.1.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.11",
-    "@types/node": "^22.14.0",
+    "@types/node": "^22.19.9",
     "@types/react": "^19.1.8",
     "@types/react-dom": "^19.1.6",
     "autoprefixer": "^10.4.21",

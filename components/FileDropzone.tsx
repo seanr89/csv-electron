@@ -1,15 +1,14 @@
 
 import React, { useState, useCallback, useRef } from 'react';
-import { CsvData } from '../types';
 import { CsvIcon } from './icons/CsvIcon';
 
 interface FileDropzoneProps {
-  onFileParsed: (data: CsvData, headers: string[], fileName: string) => void;
+  onFileSelected: (path: string, name: string) => void;
   onError: (message: string) => void;
-  delimiter: string;
+  // delimiter is not used here anymore, handled by parent during parsing call
 }
 
-const FileDropzone: React.FC<FileDropzoneProps> = ({ onFileParsed, onError, delimiter }) => {
+const FileDropzone: React.FC<FileDropzoneProps> = ({ onFileSelected, onError }) => {
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -23,38 +22,32 @@ const FileDropzone: React.FC<FileDropzoneProps> = ({ onFileParsed, onError, deli
       return;
     }
 
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      try {
-        const text = event.target?.result as string;
-        const lines = text.split(/\r?\n/).filter(line => line.trim() !== '');
-        
-        if (lines.length < 2) {
-          throw new Error('CSV file must have a header row and at least one data row.');
-        }
+    // In Electron, we must use the exposed webUtils API to get the path
+    // because standard File.path is restricted in context-isolated environments.
+    let filePath = '';
 
-        const headers = lines[0].split(delimiter).map(h => h.trim());
-        const data = lines.slice(1).map(line => {
-          const values = line.split(delimiter);
-          return headers.reduce((obj, header, index) => {
-            obj[header] = values[index]?.trim() || '';
-            return obj;
-          }, {} as Record<string, string>);
-        });
-        onFileParsed(data, headers, file.name);
+    // Try using the bridge first (Electron)
+    if (window.csv && window.csv.getPathForFile) {
+      try {
+        filePath = window.csv.getPathForFile(file);
       } catch (e) {
-        if (e instanceof Error) {
-            onError(`Failed to parse file: ${e.message}`);
-        } else {
-            onError('An unknown error occurred during file parsing.');
-        }
+        console.error("Error getting path via bridge:", e);
       }
-    };
-    reader.onerror = () => {
-      onError('Failed to read the file.');
-    };
-    reader.readAsText(file);
-  }, [onFileParsed, onError, delimiter]);
+    }
+
+    // Fallback if bridge failed or not available (e.g. strict sandbox or old electron or dev mode issue)
+    if (!filePath) {
+      filePath = (file as any).path;
+    }
+
+    if (!filePath) {
+      onError('Could not determine file path. Please ensure you are running the app in Electron mode (npm run start or npm run dist).');
+      return;
+    }
+
+    onFileSelected(filePath, file.name);
+
+  }, [onFileSelected, onError]);
 
   const handleDragEnter = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
@@ -83,10 +76,10 @@ const FileDropzone: React.FC<FileDropzoneProps> = ({ onFileParsed, onError, deli
       e.dataTransfer.clearData();
     }
   };
-  
+
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
-        processFile(e.target.files[0]);
+      processFile(e.target.files[0]);
     }
   };
 

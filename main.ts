@@ -1,48 +1,36 @@
-import { app, BrowserWindow } from 'electron';
+import { app, BrowserWindow, ipcMain } from 'electron';
 import path from 'path';
 import url from 'url';
+import fs from 'fs';
+import csv from 'csv-parser';
+import Fuse from 'fuse.js';
 
-// Using __dirname and __filename in ESM for Node.js (if module: ESNext)
-// However, since we are targeting CommonJS in tsconfig.main.json, we might not need this if we were using require.
-// But since we are using 'import', TypeScript handles it.
-// Let's stick to the existing logic but ensure it compiles correctly.
-// Actually, simple __dirname in CommonJS context (which Electron main usually is) is fine.
-// But our package.json says "type": "module".
-// The tsconfig.main.json has "module": "CommonJS".
-// So tsc will convert import to require.
-// When "module": "CommonJS", __dirname is available globally.
-// BUT, since the input is .ts, we can just use standard imports.
-
-// Let's keep the ESM-style logic if we want to support ESM in development, but for Electron main process,
-// it's often easier to stick to CommonJS output.
-
-// The invalid 'import.meta' error might occur if we target CommonJS but use import.meta.
-// Let's adjust for better compatibility.
-
+// Determine __dirname for ESM
 const __dirname = path.join(path.dirname(url.fileURLToPath(import.meta.url)));
 
+let mainWindow: BrowserWindow | null = null;
+let csvData: any[] = [];
+let csvHeaders: string[] = [];
+let filteredData: any[] = [];
+
 function createWindow() {
-    const mainWindow = new BrowserWindow({
+    mainWindow = new BrowserWindow({
         width: 1200,
         height: 800,
-        //resizable: false,
         webPreferences: {
             preload: path.join(__dirname, 'preload.js'),
             contextIsolation: true,
-            sandbox: true,
+            sandbox: false, // Disabling sandbox for simpler IPC/Node access during dev
         },
         autoHideMenuBar: true,
         title: "CSV Data Visualizer",
     });
 
     if (!app.isPackaged) {
-        // In development, load from the Vite dev server
         mainWindow.loadURL('http://localhost:5173');
-        //mainWindow.webContents.openDevTools();
     } else {
-        // In production, load the built index.html file
         mainWindow.loadURL(url.format({
-            pathname: path.join(__dirname, '../dist/index.html'), // Adjusted path since main.js will be in dist-electron/
+            pathname: path.join(__dirname, '../dist/index.html'),
             protocol: 'file:',
             slashes: true,
         }));
@@ -51,6 +39,63 @@ function createWindow() {
 
 app.whenReady().then(() => {
     createWindow();
+
+    // IPC Handler: Parse CSV File
+    ipcMain.handle('csv:parse-file', async (_event, filePath: string, delimiter: string) => {
+        console.log(`Parsing file: ${filePath} with delimiter: ${delimiter}`);
+        return new Promise((resolve, reject) => {
+            // Reset State
+            csvData = [];
+            csvHeaders = [];
+            filteredData = [];
+
+            const results: any[] = [];
+
+            fs.createReadStream(filePath)
+                .pipe(csv({ separator: delimiter }))
+                .on('headers', (headers: string[]) => {
+                    csvHeaders = headers;
+                })
+                .on('data', (data: any) => {
+                    results.push(data);
+                })
+                .on('end', () => {
+                    csvData = results;
+                    filteredData = results; // Initially, all data is "filtered" data
+                    console.log(`Parsed ${results.length} rows.`);
+                    resolve({ totalRows: results.length, headers: csvHeaders });
+                })
+                .on('error', (err: Error) => {
+                    console.error('CSV Parse Error:', err);
+                    reject(err);
+                });
+        });
+    });
+
+    // IPC Handler: Get Page
+    ipcMain.handle('csv:get-page', (_event, page: number, limit: number) => {
+        const start = (page - 1) * limit;
+        const end = start + limit;
+        return filteredData.slice(start, end);
+    });
+
+    // IPC Handler: Search
+    ipcMain.handle('csv:search', (_event, query: string, column: string) => {
+        if (!query) {
+            filteredData = csvData;
+        } else {
+            const fuse = new Fuse(csvData, {
+                keys: [column],
+                threshold: 0.3,
+            });
+            filteredData = fuse.search(query).map(result => result.item);
+        }
+
+        return {
+            totalCount: filteredData.length,
+            // Frontend should request page 1 after search
+        };
+    });
 
     app.on('activate', () => {
         if (BrowserWindow.getAllWindows().length === 0) {
